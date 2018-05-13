@@ -329,13 +329,14 @@ func (l *lvmDriver) Mount(req *volume.MountRequest) (*volume.MountResponse, erro
 			mountArgs = append([]string{"-o", "nouuid"}, mountArgs...)
 		}
 		cmd := exec.Command("mount", mountArgs...)
-		if out, err := cmd.CombinedOutput(); err != nil {
+		var out []byte
+		if out, err = cmd.CombinedOutput(); err != nil {
 			l.logger.Err(fmt.Sprintf("Mount: mount error: %s output %s", err, string(out)))
 			return &volume.MountResponse{}, fmt.Errorf("Error mouting volume")
 		}
 	}
 	l.count[req.Name]++
-	if err := saveToDisk(l.volumes, l.count); err != nil {
+	if err = saveToDisk(l.volumes, l.count); err != nil {
 		return &volume.MountResponse{}, err
 	}
 	return &volume.MountResponse{Mountpoint: getMountpoint(l.home, req.Name)}, nil
